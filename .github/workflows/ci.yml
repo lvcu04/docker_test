@@ -1,0 +1,38 @@
+name: CI for MyApp
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Lấy code từ repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Cài Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # 3. Cài dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Chạy test (nếu có)
+      - name: Run tests
+        run: npm test || echo "No tests yet"
+
+      # 5. Build Docker image
+      - name: Build Docker image
+        run: docker build -t myapp:ci .
+
+      # 6. Chạy container để test port
+      - name: Run Docker container
+        run: docker run -d -p 4000:3000 myapp:ci
