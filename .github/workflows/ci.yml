@@ -1,4 +1,4 @@
-name: CI for MyApp
+name: CI/CD for MyApp
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Lấy code từ repo
+      # 1. Lấy code
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -31,8 +31,12 @@ jobs:
 
       # 5. Build Docker image
       - name: Build Docker image
-        run: docker build -t myapp:ci .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/myapp:latest .
 
-      # 6. Chạy container để test port
-      - name: Run Docker container
-        run: docker run -d -p 4000:3000 myapp:ci
+      # 6. Login Docker Hub
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # 7. Push image lên Docker Hub
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/myapp:latest
